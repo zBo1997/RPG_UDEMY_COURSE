@@ -668,17 +668,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dca98ae9424541d3aa8f7bba4746142, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 6
-  jumpForce: 7
-  dashSpeed: 10
-  dashDuration: 1
-  dashCooldown: 5
-  comnboTime: 0.3
   groundCheckDistance: 1.4
   whatisGround:
     serializedVersion: 2
     m_Bits: 8
-  rb: {fileID: 2034113005}
+  moveSpeed: 6
+  jumpForce: 7
+  facingDir: 10
+  dashDuration: 1
+  dashCooldown: 5
+  comnboTime: 1
 --- !u!70 &2034113007
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

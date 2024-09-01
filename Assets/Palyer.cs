@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
 
-public class Palyer : MonoBehaviour
+public class Palyer : Entity
 {
     private float xInput;
 
-    private int facingDire = 1;
-
-    private bool facingRight = true;
+    [Header("Move info")]
 
     [SerializeField] private float moveSpeed = 10f;
 
@@ -35,18 +33,6 @@ public class Palyer : MonoBehaviour
 
     private float comboTimeWindow;
 
-    [Header("Collision info")]
-
-    [SerializeField] private float groundCheckDistance;
-
-    [SerializeField] private LayerMask whatisGround; // 碰撞层
-
-    private Animator animator;
-
-    private bool isGrounded;
-
-    public Rigidbody2D rb;
-
     /**
      * 攻击结束
      */
@@ -60,20 +46,16 @@ public class Palyer : MonoBehaviour
         }
     }
 
-    void Start()
+    override protected void Start()
     {
-        //只会被调用一次
-        rb = GetComponent<Rigidbody2D>();
-        // 获取动画器组件
-        animator = GetComponentInChildren<Animator>();
+        base.Start();
     }
 
-    void Update()
+    override protected void Update()
     {
+        base.Update();
         MoveMent();
         CheckInput();
-        CollisionChecks();
-
         // 控制冲刺
         dashTime -= Time.deltaTime;
         // 控制冷却时间
@@ -173,16 +155,6 @@ public class Palyer : MonoBehaviour
     }
 
     /**
-     * 反转方向
-    */
-    private void Flip()
-    {
-        facingDire = facingDire * -1;
-        facingRight =!facingRight;
-        transform.Rotate(0,180,0);
-    }
-
-    /**
      * 角色转头
      */
     private void FilController()
@@ -192,23 +164,6 @@ public class Palyer : MonoBehaviour
         }else if(rb.velocity.x < 0 && facingRight){
             Flip();
         }
-    }
-
-
-    /**
-     * 角色画一个射线，用于检测是否在地面上
-     */
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y - groundCheckDistance));
-    }
-
-    /**
-     *  检测是否地面上
-     */
-    private void CollisionChecks()
-    {
-       isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatisGround);
     }
 
     /**
