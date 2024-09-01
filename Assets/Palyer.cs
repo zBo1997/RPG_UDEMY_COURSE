@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class palyer : MonoBehaviour
+public class Palyer : MonoBehaviour
 {
     private float xInput;
 
@@ -14,7 +15,7 @@ public class palyer : MonoBehaviour
     
     [Header("Dash info")]
 
-    [SerializeField] private float dashSpeed;
+    [SerializeField] private float facingDir;
 
     [SerializeField] private float dashDuration;
 
@@ -23,6 +24,16 @@ public class palyer : MonoBehaviour
     private float dashTime;
 
     private float dashCooldownTimer;
+
+    [Header("Attack info")]
+
+    [SerializeField] private float comnboTime = .3f;
+
+    private bool isAttacking;
+
+    private int comboCounter;
+
+    private float comboTimeWindow;
 
     [Header("Collision info")]
 
@@ -35,6 +46,19 @@ public class palyer : MonoBehaviour
     private bool isGrounded;
 
     public Rigidbody2D rb;
+
+    /**
+     * 攻击结束
+     */
+    public void AttackOver()
+    {
+        isAttacking = false;
+        comboCounter++;
+        if (comboCounter > 2)
+        {
+            comboCounter = 0;
+        }
+    }
 
     void Start()
     {
@@ -54,6 +78,8 @@ public class palyer : MonoBehaviour
         dashTime -= Time.deltaTime;
         // 控制冷却时间
         dashCooldownTimer -= Time.deltaTime;
+        // 控制攻击
+        comboTimeWindow -= Time.deltaTime;
 
         FilController();
         AnimatorControoler();
@@ -72,6 +98,9 @@ public class palyer : MonoBehaviour
         animator.SetBool("isGrounded", isGrounded);
         //shift 冲刺
         animator.SetBool("isDashing", dashTime > 0);
+        //设置攻击相关动画
+        animator.SetBool("isAttacking", isAttacking);
+        animator.SetInteger("comboCounter", comboCounter);
     }
 
     /**
@@ -89,21 +118,53 @@ public class palyer : MonoBehaviour
     private void CheckInput()
     {
         xInput = Input.GetAxis("Horizontal");
-        if (Input.GetKeyDown(KeyCode.Space)){
+        //鼠标进行攻击
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            StartAttackEvent();
+        }
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
             Jump();
         }
-        if (Input.GetKeyDown(KeyCode.LeftShift)){
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
             DashAbility();
         }
     }
+
     /**
-     * 移动
+     * 攻击开始事件
      */
+    private void StartAttackEvent()
+    {
+        //如果不是地面直接返回不能攻击
+        if (isGrounded == false)
+        {
+            return;
+        }
+        // 控制攻击冷却时间
+        if (comboTimeWindow < 0)
+        {
+            comboCounter = 0;
+        }
+        isAttacking = true;
+        comboTimeWindow = comnboTime;
+    }
+
+    /**
+    * 移动
+    */
     private void MoveMent()
     {
-        if (dashTime > 0)
+        //移动无法攻击
+        if (isAttacking)
         {
-            rb.velocity = new Vector2(dashSpeed * xInput, 0);
+            rb.velocity = new Vector2(0, 0);
+        }
+        else if (dashTime > 0)
+        {
+            rb.velocity = new Vector2(facingDir * xInput, 0);
         } 
         else 
         {
@@ -155,16 +216,17 @@ public class palyer : MonoBehaviour
      */
     private void DashAbility()
     {
-        // 控制冲刺
-    if (dashCooldownTimer < 0){
-        dashTime = dashDuration;
-        dashCooldownTimer = dashCooldown;
-    }
-    if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer < 0)
-            {
-                dashTime = dashDuration;
-                dashCooldownTimer = dashCooldown;
-            }
+        // 控制冲刺 攻击时不能冲刺
+        if (dashCooldownTimer < 0 && isAttacking == false)
+        {
+            dashTime = dashDuration;
+            dashCooldownTimer = dashCooldown;
+        }
+        if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer < 0)
+        {
+            dashTime = dashDuration;
+            dashCooldownTimer = dashCooldown;
+        }
     }
          
 }
